@@ -1,7 +1,4 @@
 services:
-
-  # ─── Bancos de Dados ──────────────────────────────────────────────────────────
-
   postgres:
     image: postgres:16-alpine
     container_name: dias-postgres
@@ -10,7 +7,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: atendimentos
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -171,6 +168,7 @@ services:
       ERP_INTERNAL_API_KEY: dias-internal-key-dev-32-chars!!
       EVOLUTION_BASE_URL: http://evolution-api:8080
       EVOLUTION_GLOBAL_API_KEY: SuaChaveSecreta123
+      CHATBOT_WEBHOOK_BASE_URL: http://dias-chatbot:8085
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
