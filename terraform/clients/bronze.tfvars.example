@@ -1,0 +1,17 @@
+# ── Plano Bronze ─────────────────────────────────────────────────────────────
+# 2 containers: 2 React (site institucional + hub de links)
+# Instância: t3.small (2 vCPU / 2 GB) + 2 GB swap | Disco: 20 GB
+# Backup: 7 dias
+
+aws_region     = "us-east-1"
+admin_cidr     = "SEU_IP/32"
+hosted_zone_id = "Z0123456789ABCDEFGHIJ"
+
+clients = {
+  "nome-cliente" = {
+    tier        = "bronze"
+    domain      = "nomecliente.com.br"
+    key_pair    = "dias-platform-key"
+    admin_email = "contato@nomecliente.com.br"
+  }
+}

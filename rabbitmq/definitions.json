@@ -1,0 +1,32 @@
+{
+  "vhosts": [{ "name": "/" }],
+  "exchanges": [
+    {
+      "name": "notification.exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "notification.queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "notification.exchange",
+      "vhost": "/",
+      "destination": "notification.queue",
+      "destination_type": "queue",
+      "routing_key": "notification.routing-key",
+      "arguments": {}
+    }
+  ]
+}

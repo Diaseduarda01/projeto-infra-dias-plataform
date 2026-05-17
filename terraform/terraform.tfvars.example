@@ -1,0 +1,28 @@
+# Copie para terraform.tfvars e preencha os valores reais
+# NUNCA suba terraform.tfvars com dados reais no git
+
+aws_region     = "us-east-1"
+admin_cidr     = "SEU_IP/32"   # ex: 177.123.45.67/32
+hosted_zone_id = "Z0123456789ABCDEFGHIJ"
+
+# Para múltiplos clientes simultâneos:
+clients = {
+  "cliente-a" = {
+    tier        = "gold"
+    domain      = "clientea.com.br"
+    key_pair    = "dias-platform-key"
+    admin_email = "contato@clientea.com.br"
+  },
+  "cliente-b" = {
+    tier        = "platinum"
+    domain      = "clienteb.com.br"
+    key_pair    = "dias-platform-key"
+    admin_email = "contato@clienteb.com.br"
+  },
+  "cliente-c" = {
+    tier        = "bronze"
+    domain      = "clientec.com.br"
+    key_pair    = "dias-platform-key"
+    admin_email = "contato@clientec.com.br"
+  }
+}

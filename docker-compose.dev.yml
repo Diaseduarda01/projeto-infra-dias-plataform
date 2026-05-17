@@ -1,0 +1,189 @@
+services:
+
+  # ─── Bancos de Dados ──────────────────────────────────────────────────────────
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: dias-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: atendimentos
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+  mysql:
+    image: mysql:8.0
+    container_name: dias-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: chatbot_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ../ms-database/services/ms-chatbot/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  erp-db-init:
+    build:
+      context: ../ms-erp-api
+    container_name: dias-erp-db-init
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/atendimentos
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "npx prisma migrate deploy && npx tsx prisma/seed.ts"
+    restart: "no"
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: dias-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  # ─── Evolution API ────────────────────────────────────────────────────────────
+
+  evolution-postgres:
+    image: postgres:15-alpine
+    container_name: evolution_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: Evolution@2024Secure
+      POSTGRES_DB: evolution_db
+    volumes:
+      - evolution_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evolution -d evolution_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  evolution-redis:
+    image: redis:7-alpine
+    container_name: evolution_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - evolution_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  evolution-api:
+    image: evoapicloud/evolution-api:latest
+    container_name: evolution_api
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    volumes:
+      - evolution_instances:/evolution/instances
+      - evolution_store:/evolution/store
+    environment:
+      SERVER_TYPE: http
+      SERVER_PORT: "8080"
+      SERVER_URL: http://localhost:8081
+      CORS_ORIGIN: "*"
+      CORS_METHODS: GET,POST,PUT,DELETE
+      CORS_CREDENTIALS: "true"
+      LOG_LEVEL: ERROR,WARN,INFO
+      LOG_COLOR: "true"
+      LOG_BAILEYS: error
+      DEL_INSTANCE: "false"
+      DEL_TEMP_INSTANCES: "true"
+      DATABASE_ENABLED: "true"
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://evolution:Evolution@2024Secure@evolution-postgres:5432/evolution_db?schema=public
+      DATABASE_CONNECTION_CLIENT_NAME: evolution_client
+      DATABASE_SAVE_DATA_INSTANCE: "true"
+      DATABASE_SAVE_DATA_NEW_MESSAGE: "true"
+      DATABASE_SAVE_MESSAGE_UPDATE: "true"
+      DATABASE_SAVE_DATA_CONTACTS: "true"
+      DATABASE_SAVE_DATA_CHATS: "true"
+      DATABASE_SAVE_DATA_LABELS: "true"
+      DATABASE_SAVE_DATA_HISTORIC: "true"
+      CACHE_REDIS_ENABLED: "true"
+      CACHE_REDIS_URI: redis://evolution-redis:6379/0
+      CACHE_REDIS_PREFIX_KEY: evolution
+      CACHE_REDIS_SAVE_INSTANCES: "false"
+      CACHE_LOCAL_ENABLED: "false"
+      WEBSOCKET_ENABLED: "true"
+      WEBSOCKET_GLOBAL_EVENTS: "true"
+      WEBHOOK_GLOBAL_ENABLED: "false"
+      WEBHOOK_EVENTS_QRCODE_UPDATED: "true"
+      WEBHOOK_EVENTS_MESSAGES_UPSERT: "true"
+      WEBHOOK_EVENTS_CONNECTION_UPDATE: "true"
+      AUTHENTICATION_TYPE: apikey
+      AUTHENTICATION_API_KEY: SuaChaveSecreta123
+      AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "true"
+      CONFIG_SESSION_PHONE_CLIENT: Evolution API
+      CONFIG_SESSION_PHONE_NAME: Chrome
+      LANGUAGE: pt-BR
+    depends_on:
+      evolution-postgres:
+        condition: service_healthy
+      evolution-redis:
+        condition: service_healthy
+    command: ["node", "./dist/src/main.js"]
+
+  # ─── Microserviços ────────────────────────────────────────────────────────────
+
+  ms-chatbot:
+    build:
+      context: ../ms-chatbot
+    container_name: dias-chatbot
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/chatbot_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      INTERNAL_API_KEY: dias-internal-key-dev-32-chars!!
+      ERP_BASE_URL: http://host.docker.internal:3333
+      ERP_INTERNAL_API_KEY: dias-internal-key-dev-32-chars!!
+      EVOLUTION_BASE_URL: http://evolution-api:8080
+      EVOLUTION_GLOBAL_API_KEY: SuaChaveSecreta123
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      evolution-api:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  mysql_data:
+  rabbitmq_data:
+  evolution_postgres_data:
+  evolution_redis_data:
+  evolution_instances:
+  evolution_store:

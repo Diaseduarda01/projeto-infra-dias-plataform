@@ -1,0 +1,17 @@
+# ── Plano Platinum ────────────────────────────────────────────────────────────
+# 9 containers: 3 React | MySQL | 2 NestJS | Grafana | Python | Java lembrete
+# Instância: t3.large (2 vCPU / 8 GB) | Disco: 60 GB
+# Backup: 15 dias
+
+aws_region     = "us-east-1"
+admin_cidr     = "SEU_IP/32"
+hosted_zone_id = "Z0123456789ABCDEFGHIJ"
+
+clients = {
+  "nome-cliente" = {
+    tier        = "platinum"
+    domain      = "nomecliente.com.br"
+    key_pair    = "dias-platform-key"
+    admin_email = "contato@nomecliente.com.br"
+  }
+}

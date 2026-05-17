@@ -1,0 +1,22 @@
+# ── Plano Gold ────────────────────────────────────────────────────────────────
+# 13 containers: 3 React | MySQL | 3 NestJS | Grafana | Python |
+#                Java lembrete | Java ETL | Evolution API | Java chatbot
+# Instância: t3.xlarge (4 vCPU / 16 GB) | Disco: 100 GB
+# Backup: 30 dias | S3 files incluso
+#
+# Uso:
+#   terraform plan  -var-file=clients/gold.tfvars.example
+#   terraform apply -var-file=clients/gold.tfvars.example
+
+aws_region     = "us-east-1"
+admin_cidr     = "SEU_IP/32"
+hosted_zone_id = "Z0123456789ABCDEFGHIJ"
+
+clients = {
+  "nome-cliente" = {
+    tier        = "gold"
+    domain      = "nomecliente.com.br"
+    key_pair    = "dias-platform-key"
+    admin_email = "contato@nomecliente.com.br"
+  }
+}
