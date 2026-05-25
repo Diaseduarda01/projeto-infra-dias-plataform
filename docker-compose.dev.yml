@@ -26,7 +26,8 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ../ms-database/services/ms-chatbot/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ../ms-database/services/ms-chatbot/schema.sql:/docker-entrypoint-initdb.d/01-chatbot.sql:ro
+      - ../ms-database/services/ms-client-scheduling/schema.sql:/docker-entrypoint-initdb.d/02-client-scheduling.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 10s

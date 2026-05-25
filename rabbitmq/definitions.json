@@ -1,10 +1,35 @@
 {
+  "users": [
+    {
+      "name": "admin",
+      "password_hash": "Somdewvuo50FxDKT/WWgQSL/Of7YdvFq6tnTNtV6ytEqhRgj",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "administrator"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "admin",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
   "vhosts": [{ "name": "/" }],
   "exchanges": [
     {
-      "name": "notification.exchange",
+      "name": "erp.events",
       "vhost": "/",
-      "type": "direct",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "erp.dlx",
+      "vhost": "/",
+      "type": "fanout",
       "durable": true,
       "auto_delete": false,
       "arguments": {}
@@ -12,7 +37,162 @@
   ],
   "queues": [
     {
-      "name": "notification.queue",
+      "name": "notificacao.agendamento_criado",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "erp.dlx",
+        "x-dead-letter-routing-key": "notificacao.agendamento_criado",
+        "x-message-ttl": 86400000
+      }
+    },
+    {
+      "name": "notificacao.agendamento_criado.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "notificacao.agendamento_cancelado",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "erp.dlx",
+        "x-dead-letter-routing-key": "notificacao.agendamento_cancelado",
+        "x-message-ttl": 86400000
+      }
+    },
+    {
+      "name": "notificacao.agendamento_cancelado.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "notificacao.lembrete",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "erp.dlx",
+        "x-dead-letter-routing-key": "notificacao.lembrete",
+        "x-message-ttl": 86400000
+      }
+    },
+    {
+      "name": "notificacao.lembrete.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "notificacao.cobranca_expirada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "erp.dlx",
+        "x-dead-letter-routing-key": "notificacao.cobranca_expirada",
+        "x-message-ttl": 86400000
+      }
+    },
+    {
+      "name": "notificacao.cobranca_expirada.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "notificacao.relatorio_pronto",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "erp.dlx",
+        "x-dead-letter-routing-key": "notificacao.relatorio_pronto",
+        "x-message-ttl": 86400000
+      }
+    },
+    {
+      "name": "notificacao.relatorio_pronto.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "financeiro.cobranca_pendente",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "erp.dlx",
+        "x-dead-letter-routing-key": "financeiro.cobranca_pendente",
+        "x-message-ttl": 86400000
+      }
+    },
+    {
+      "name": "financeiro.cobranca_pendente.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "erp.pagamento_confirmado",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "erp.dlx",
+        "x-dead-letter-routing-key": "erp.pagamento_confirmado",
+        "x-message-ttl": 86400000
+      }
+    },
+    {
+      "name": "erp.pagamento_confirmado.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "erp.agendamento_chatbot",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "erp.dlx",
+        "x-dead-letter-routing-key": "erp.agendamento_chatbot",
+        "x-message-ttl": 86400000
+      }
+    },
+    {
+      "name": "erp.agendamento_chatbot.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "files.gerar_relatorio",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "erp.dlx",
+        "x-dead-letter-routing-key": "files.gerar_relatorio",
+        "x-message-ttl": 86400000
+      }
+    },
+    {
+      "name": "files.gerar_relatorio.dlq",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
@@ -21,11 +201,147 @@
   ],
   "bindings": [
     {
-      "source": "notification.exchange",
+      "source": "erp.events",
       "vhost": "/",
-      "destination": "notification.queue",
+      "destination": "notificacao.agendamento_criado",
       "destination_type": "queue",
-      "routing_key": "notification.routing-key",
+      "routing_key": "agendamento.criado",
+      "arguments": {}
+    },
+    {
+      "source": "erp.events",
+      "vhost": "/",
+      "destination": "notificacao.agendamento_cancelado",
+      "destination_type": "queue",
+      "routing_key": "agendamento.cancelado",
+      "arguments": {}
+    },
+    {
+      "source": "erp.events",
+      "vhost": "/",
+      "destination": "notificacao.lembrete",
+      "destination_type": "queue",
+      "routing_key": "agendamento.lembrete",
+      "arguments": {}
+    },
+    {
+      "source": "erp.events",
+      "vhost": "/",
+      "destination": "notificacao.cobranca_expirada",
+      "destination_type": "queue",
+      "routing_key": "pagamento.expirado",
+      "arguments": {}
+    },
+    {
+      "source": "erp.events",
+      "vhost": "/",
+      "destination": "notificacao.relatorio_pronto",
+      "destination_type": "queue",
+      "routing_key": "relatorio.pronto",
+      "arguments": {}
+    },
+    {
+      "source": "erp.events",
+      "vhost": "/",
+      "destination": "financeiro.cobranca_pendente",
+      "destination_type": "queue",
+      "routing_key": "agendamento.concluido",
+      "arguments": {}
+    },
+    {
+      "source": "erp.events",
+      "vhost": "/",
+      "destination": "erp.pagamento_confirmado",
+      "destination_type": "queue",
+      "routing_key": "pagamento.confirmado",
+      "arguments": {}
+    },
+    {
+      "source": "erp.events",
+      "vhost": "/",
+      "destination": "erp.agendamento_chatbot",
+      "destination_type": "queue",
+      "routing_key": "chatbot.agendamento",
+      "arguments": {}
+    },
+    {
+      "source": "erp.events",
+      "vhost": "/",
+      "destination": "files.gerar_relatorio",
+      "destination_type": "queue",
+      "routing_key": "relatorio.solicitado",
+      "arguments": {}
+    },
+    {
+      "source": "erp.dlx",
+      "vhost": "/",
+      "destination": "notificacao.agendamento_criado.dlq",
+      "destination_type": "queue",
+      "routing_key": "notificacao.agendamento_criado",
+      "arguments": {}
+    },
+    {
+      "source": "erp.dlx",
+      "vhost": "/",
+      "destination": "notificacao.agendamento_cancelado.dlq",
+      "destination_type": "queue",
+      "routing_key": "notificacao.agendamento_cancelado",
+      "arguments": {}
+    },
+    {
+      "source": "erp.dlx",
+      "vhost": "/",
+      "destination": "notificacao.lembrete.dlq",
+      "destination_type": "queue",
+      "routing_key": "notificacao.lembrete",
+      "arguments": {}
+    },
+    {
+      "source": "erp.dlx",
+      "vhost": "/",
+      "destination": "notificacao.cobranca_expirada.dlq",
+      "destination_type": "queue",
+      "routing_key": "notificacao.cobranca_expirada",
+      "arguments": {}
+    },
+    {
+      "source": "erp.dlx",
+      "vhost": "/",
+      "destination": "notificacao.relatorio_pronto.dlq",
+      "destination_type": "queue",
+      "routing_key": "notificacao.relatorio_pronto",
+      "arguments": {}
+    },
+    {
+      "source": "erp.dlx",
+      "vhost": "/",
+      "destination": "financeiro.cobranca_pendente.dlq",
+      "destination_type": "queue",
+      "routing_key": "financeiro.cobranca_pendente",
+      "arguments": {}
+    },
+    {
+      "source": "erp.dlx",
+      "vhost": "/",
+      "destination": "erp.pagamento_confirmado.dlq",
+      "destination_type": "queue",
+      "routing_key": "erp.pagamento_confirmado",
+      "arguments": {}
+    },
+    {
+      "source": "erp.dlx",
+      "vhost": "/",
+      "destination": "erp.agendamento_chatbot.dlq",
+      "destination_type": "queue",
+      "routing_key": "erp.agendamento_chatbot",
+      "arguments": {}
+    },
+    {
+      "source": "erp.dlx",
+      "vhost": "/",
+      "destination": "files.gerar_relatorio.dlq",
+      "destination_type": "queue",
+      "routing_key": "files.gerar_relatorio",
       "arguments": {}
     }
   ]
